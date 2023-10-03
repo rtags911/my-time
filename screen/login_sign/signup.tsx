@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import {
   TextSafe,
   SafeVi2,
@@ -22,10 +22,8 @@ import {
   createStackNavigator,
   StackNavigationProp,
 } from "@react-navigation/stack";
-import { signUp} from "../../apis/Signup_Users";
-import axios from "axios";
-
-
+import { signUp } from "../../apis/Signup_Users";
+import Toast from "react-native-toast-message";
 
 const Signup = ({ navigation }: { navigation: any }) => {
   const [email, setTextEmail] = React.useState("");
@@ -33,32 +31,39 @@ const Signup = ({ navigation }: { navigation: any }) => {
   const [password, setTextPass] = React.useState("");
   const [isPasswordShown, setIsPasswordShown] = useState(false);
 
+  const handleSignUp = async () => {
+    try {
+      const userResponse = await signUp(email, mobile, password);
 
-const handleSignUp = async () => {
-  try {
-  const userResponse = await signUp(email, mobile, password);
-  console.log('User Response:', userResponse); // Log the entire response
+      if (
+        userResponse &&
+        userResponse.status >= 200 &&
+        userResponse.status < 300
+      ) {
+        // Display a success alert
+        Alert.alert("Success", "Account Created Successfully", [
+          { text: "OK", onPress: () => navigation.navigate("Login") },
+        ]);
 
-  if (userResponse && userResponse.status >= 200 || userResponse.status < 300) {
-    // Handle the successful response here
-    console.log('User created successfully:', userResponse.data);
-  } else {
-    // Handle other status codes or error cases
-   // console.error('User creation failed with status:', userResponse.status);
-    //console.error('Response Data:', userResponse.data);
-  }
-} catch (error) {
-  // Handle any errors (e.g., display an error message)
-  console.error('Sign-up error:', error);
-}
+        console.log("User created successfully:", userResponse.data);
+      } else {
+        // Display an error alert
+        alert("Failed to Create Account");
 
-};
+        console.error("User creation failed with status:", userResponse.status);
+        console.error("Response Data:", userResponse.data);
+      }
+    } catch (error) {
+      // Display an error alert
+      alert("Sign-up Error");
+
+      console.error("Sign-up error:", error);
+    }
+  };
 
 
+   
 
-const handleConst = async () => {
-console.log("TESTER");
-};
 
   return (
     <SafeVi2>
@@ -73,6 +78,7 @@ console.log("TESTER");
 
         <TextSafe> Create Account</TextSafe>
       </ViewsButton>
+
       {/*   Email */}
 
       <View_Holder>
