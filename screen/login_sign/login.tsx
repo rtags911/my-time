@@ -20,18 +20,30 @@ import {
   Button_signUp2,
 } from "../style-log/Safe";
 
-
-
 import React, { useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Pressable } from "react-native";
+import {
+  Pressable,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Sign from "../login_sign/signup";
 import Welcome from "../welcome";
+import Home from "../Home";
 import {
   createStackNavigator,
   StackNavigationProp,
 } from "@react-navigation/stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+
+
+
+
+
+
+
 
 
 
@@ -41,6 +53,41 @@ const Login = ({ navigation }: { navigation: any }) => {
   const [pass, setTextPass] = React.useState("");
   const [isPasswordShown, setIsPasswordShown] = useState(true);
   const [isChecked, setChecked] = useState(false);
+const [isLoading, setIsLoading] = useState(false);
+
+
+ const submitLogin = async () => {
+   console.log("first", email);
+   console.log("fffs", pass);
+
+   try {
+     const response = await axios.post(
+       "http://192.168.1.13:1337/api/auth/local",
+       {
+         identifier: email, // Use the username or email entered by the user
+         password: pass,
+       }
+     );
+     // If the login is successful, you can save the authentication token
+     const authToken = response.data.jwt;
+     // Store the token in AsyncStorage for future requests
+     await AsyncStorage.setItem("authToken", authToken);
+     // Redirect to another screen (e.g., Home) after successful login
+     navigation.navigate("Home");
+
+     console.log("Login successful");
+   } catch (error) {
+     // Handle login error (e.g., incorrect credentials)
+     console.error("Login failed:", error);
+     // Show an alert to the user indicating login failure
+     Alert.alert(
+       "Login Failed",
+       "Please check your credentials and try again."
+     );
+   }
+ };
+
+
 
 
 
@@ -61,8 +108,8 @@ const Login = ({ navigation }: { navigation: any }) => {
 
           <Texthold2
             placeholder="Email"
-            // onChangeText={(newText) => setTextEmail(newText)}
-            // defaultValue={email}
+            onChangeText={(newText) => setTextEmail(newText)}
+            defaultValue={email}
           ></Texthold2>
         </View_Holder2>
 
@@ -119,7 +166,7 @@ const Login = ({ navigation }: { navigation: any }) => {
           </Text>
         </View>
 
-        <Button_signUp2 >
+        <Button_signUp2 onPress={submitLogin}>
           <TextButton_signUp2>Login</TextButton_signUp2>
         </Button_signUp2>
 
